@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Dashboard</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        select {
+            margin: 10px;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        #news-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .flashcard {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .flashcard img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .flashcard h2 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .flashcard p {
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>News Dashboard</h1>
+        <div>
+            <select id="region-select">
+                <option value="us">United States</option>
+                <option value="gb">United Kingdom</option>
+                <option value="in">India</option>
+                <option value="international">International</option>
+            </select>
+            <select id="category-select">
+                <option value="general">General</option>
+                <option value="sports">Sports</option>
+                <option value="business">Business</option>
+                <option value="entertainment">Entertainment</option>
+            </select>
+        </div>
+    </header>
+
+    <main id="news-container">
+        <!-- News flashcards will be rendered here -->
+    </main>
+
+    <script>
+        const newsContainer = document.getElementById('news-container');
+        const regionSelect = document.getElementById('region-select');
+        const categorySelect = document.getElementById('category-select');
+        const apiKey = 'e5ed3b4fa13e488cb8b59ccb61433046'; // Replace with your NewsAPI key
+
+        // Event listeners for region and category select
+        regionSelect.addEventListener('change', fetchNews);
+        categorySelect.addEventListener('change', fetchNews);
+
+        // Initial fetch when the page loads
+        fetchNews();
+
+        function fetchNews() {
+            let region = regionSelect.value;
+            let category = categorySelect.value;
+            let apiUrl;
+
+            if (region === 'international') {
+                apiUrl = https://newsapi.org/v2/top-headlines?category=${category}&apiKey=${apiKey};
+            } else {
+                apiUrl = https://newsapi.org/v2/top-headlines?country=${region}&category=${category}&apiKey=${apiKey};
+            }
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.articles) {
+                        renderNews(data.articles);
+                    } else {
+                        throw new Error('No articles found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching news:', error);
+                    newsContainer.innerHTML = <p>Error fetching news: ${error.message}</p>;
+                });
+        }
+
+        function renderNews(articles) {
+            newsContainer.innerHTML = ''; // Clear previous news
+
+            articles.forEach(article => {
+                const flashcard = document.createElement('div');
+                flashcard.classList.add('flashcard');
+
+                const img = document.createElement('img');
+                img.src = article.urlToImage ? article.urlToImage : 'https://via.placeholder.com/300x150';
+                img.alt = article.title;
+                flashcard.appendChild(img);
+
+                const h2 = document.createElement('h2');
+                h2.textContent = article.title;
+                flashcard.appendChild(h2);
+
+                const p = document.createElement('p');
+                p.textContent = article.description || 'No description available.';
+                flashcard.appendChild(p);
+
+                newsContainer.appendChild(flashcard);
+            });
+        }
+    </script>
+</body>
+</html>
